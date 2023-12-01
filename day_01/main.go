@@ -43,6 +43,19 @@ func reverseString(s string) string {
 	// Convert the slice of runes back to a string
 	return string(runes)
 }
+func reverseBytes(s []byte) []byte {
+	// Convert string to a slice of runes
+	// Get the length of the slice
+	n := len(s)
+
+	// Swap the runes from the ends towards the center
+	for i := 0; i < n/2; i++ {
+		s[i], s[n-1-i] = s[n-1-i], s[i]
+	}
+
+	// Convert the slice of runes back to a string
+	return s
+}
 func partOne(input [][]byte) (sum int) {
 	var re = regexp.MustCompile("[0-9]")
 	for _, row := range input {
@@ -78,19 +91,19 @@ func partTwo(input [][]byte) (sum int) {
 	var reversedRe = regexp.MustCompile(reversedRegex)
 
 	for _, row := range input {
-		var normalOrderNums = normalRe.FindAllString(string(row), -1)
-		var reversedOrderNums = reversedRe.FindAllString(reverseString(string(row)), -1)
+		var normalOrderNums = normalRe.FindAll(row, -1)
+		var reversedOrderNums = reversedRe.FindAll(reverseBytes(row), -1)
 		var composedNumber = ""
 		if unicode.IsDigit(rune(normalOrderNums[0][0])) {
-			composedNumber = normalOrderNums[0]
+			composedNumber = string(normalOrderNums[0])
 		} else {
-			composedNumber = numMap[normalOrderNums[0]]
+			composedNumber = numMap[string(normalOrderNums[0])]
 		}
 
 		if unicode.IsDigit(rune(reversedOrderNums[0][0])) {
-			composedNumber += reversedOrderNums[0]
+			composedNumber += string(reversedOrderNums[0])
 		} else {
-			composedNumber += numMap[reversedOrderNums[0]]
+			composedNumber += numMap[string(reversedOrderNums[0])]
 		}
 
 		var convertedNumber, _ = strconv.Atoi(composedNumber)
