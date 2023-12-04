@@ -10,11 +10,10 @@ import (
 
 const INPUT_FILE = "day_04/input.txt"
 
-var globalWinnings = map[int]int{}
-var totalScratchcardAmount = 0
-
-func partOne(data [][]byte) (out int) {
+func bothParts(data [][]byte) (out1, totalScratchcardAmount int) {
 	var integerRegexp = regexp.MustCompile("([\\d|]+)")
+	var globalWinnings = map[int]int{}
+
 	for _, line := range data {
 		var winningNumbers = map[string]bool{}
 		var validNumbersAmount = 0
@@ -38,7 +37,7 @@ func partOne(data [][]byte) (out int) {
 			}
 		}
 		if validNumbersAmount >= 0 {
-			out += int(math.Pow(2, float64(validNumbersAmount)-1))
+			out1 += int(math.Pow(2, float64(validNumbersAmount)-1))
 			var cardID, _ = strconv.Atoi(string(foundNumbers[0]))
 			globalWinnings[cardID] = validNumbersAmount
 		}
@@ -47,26 +46,27 @@ func partOne(data [][]byte) (out int) {
 	for cardID, validNumbersAmount := range globalWinnings {
 		totalScratchcardAmount++
 		for i := 1; i <= validNumbersAmount; i++ {
-			traverseCards(cardID + i)
+			traverseCards(globalWinnings, cardID+i, &totalScratchcardAmount)
 		}
 	}
 	return
 }
 
-func traverseCards(cardID int) {
-	totalScratchcardAmount++
+func traverseCards(globalWinnings map[int]int, cardID int, totalScratchcardAmount *int) {
+	*totalScratchcardAmount++
 	var validNumbersAmount, ok = globalWinnings[cardID]
 	if !ok {
 		return
 	}
 	for i := 1; i <= validNumbersAmount; i++ {
-		traverseCards(cardID + i)
+		traverseCards(globalWinnings, cardID+i, totalScratchcardAmount)
 	}
 }
 
 func main() {
 	var data = utils.GetInput(INPUT_FILE)
-	fmt.Println("Part 1:", partOne(data))
-	fmt.Println("Part 2:", totalScratchcardAmount)
+	var out1, out2 = bothParts(data)
+	fmt.Println("Part 1:", out1)
+	fmt.Println("Part 2:", out2)
 
 }
