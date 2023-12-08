@@ -4,7 +4,6 @@ import (
 	"fmt"
 	"github.com/Ziken/advent_of_code_2023/utils"
 	"regexp"
-	"time"
 )
 
 type NodeCycle struct {
@@ -46,8 +45,6 @@ func partOne(network map[string][]string, directions []int) (stepsCount int) {
 			}
 		}
 	}
-
-	return
 }
 
 func findCycle(network map[string][]string, directions []int, startNode string) (offset, cycle int) {
@@ -123,7 +120,5 @@ func main() {
 	var data = utils.GetInput("day_08/input.txt")
 	var network, directions = parseInput(data)
 	fmt.Println("Part one:", partOne(network, directions))
-	var start = time.Now()
 	fmt.Println("Part Two:", partTwo(network, directions))
-	fmt.Println("Time elapsed:", time.Since(start))
 }
