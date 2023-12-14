@@ -58,33 +58,22 @@ func getPermutationNumberOfParts(spring Spring, consideredPartIndex int, startin
 	}
 
 	var consideredPart = spring.Parts[consideredPartIndex]
-	var wasDamagedPartPresent = false
-	var lastOccurrenceOfDamagedPart = 999
 	for i := startingPos; i < len(spring.Spring); i++ {
 		if i > 0 && spring.Spring[i-1] == PART_DAMAGED {
 			continue
 		}
-		var partUnknownCounter = 0
-		var partDamagedCounter = 0
+		var partCounter = 0
 
 		for j := i; j < len(spring.Spring); j++ {
 			if spring.Spring[j] == PART_UNKNOWN {
-				partUnknownCounter += 1
+				partCounter += 1
 			} else if spring.Spring[j] == PART_DAMAGED {
-				wasDamagedPartPresent = true
-				partDamagedCounter += 1
-				if (j - lastOccurrenceOfDamagedPart) > consideredPart {
-					return out
-				}
-				lastOccurrenceOfDamagedPart = j
+				partCounter += 1
 			} else {
 				// PART_OPERATIONAL
 				break
 			}
-			if (partUnknownCounter + partDamagedCounter) == consideredPart {
-				if partDamagedCounter == 0 && wasDamagedPartPresent {
-					return out
-				}
+			if partCounter == consideredPart {
 				// part counter is valid
 				if (j + 1) >= len(spring.Spring) {
 					out += getPermutationNumberOfParts(spring, consideredPartIndex+1, j+1)
@@ -101,89 +90,6 @@ func getPermutationNumberOfParts(spring Spring, consideredPartIndex int, startin
 	}
 	return
 }
-
-//func getPermutationNumberOfParts(spring Spring, currentPartIndex int, startingPos int) (validOrder int) {
-//	if startingPos == len(spring.Spring) {
-//		if currentPartIndex == len(spring.Parts) {
-//			//fmt.Println("Valid", string(spring.Spring))
-//			return 1
-//		}
-//		// End of Spring, not parts to match
-//		return 0
-//	}
-//	if currentPartIndex == len(spring.Parts) {
-//		// End of parts
-//		// check if there is any part different than PART_OPERATIONAL
-//		var b = bytes.ContainsAny(spring.Spring[startingPos:], string(PART_DAMAGED))
-//		if b {
-//			return 0
-//		}
-//		//fmt.Println("Valid", string(spring.Spring))
-//		return 1
-//	}
-//	var currentPartCounter = spring.Parts[currentPartIndex]
-//	var i = startingPos
-//	for ; i < len(spring.Spring); i++ {
-//		var cpSpring = make([]byte, len(spring.Spring))
-//		copy(cpSpring, spring.Spring)
-//		var usedParts = 0
-//		var j = i
-//
-//		for j < len(cpSpring) {
-//			var prevJ = j
-//			if j > 0 && cpSpring[j-1] == PART_DAMAGED {
-//				j++
-//				continue
-//			}
-//			for ; j < len(cpSpring) && usedParts < currentPartCounter && cpSpring[j] == PART_UNKNOWN; j++ {
-//				usedParts++
-//				cpSpring[j] = PART_DAMAGED
-//			}
-//			for ; j < len(cpSpring) && cpSpring[j] == PART_DAMAGED && usedParts < currentPartCounter; j++ {
-//				usedParts++
-//			}
-//			if prevJ == j {
-//				// no modification done. Exit this variant
-//				break
-//			}
-//			if usedParts > currentPartCounter {
-//				// to many parts used. Exit this variant
-//				break
-//			}
-//			if usedParts == currentPartCounter {
-//				if j < len(cpSpring) {
-//					//var countedParts = 0
-//					//for p := j - 1; p > 0; p-- {
-//					//	if cpSpring[p] == PART_DAMAGED {
-//					//		countedParts++
-//					//	} else {
-//					//		break
-//					//	}
-//					//}
-//					//// check if there is a collision with counted parts
-//					//if countedParts > currentPartCounter {
-//					//	break
-//					//}
-//					if cpSpring[j] == PART_DAMAGED {
-//						// reverse, invalid end
-//						break
-//					} else {
-//						cpSpring[j] = PART_OPERATIONAL
-//						j++
-//						validOrder += getPermutationNumberOfParts(Spring{Spring: cpSpring, Parts: spring.Parts}, currentPartIndex+1, j)
-//						break
-//					}
-//				} else {
-//					// end of spring if (currentPartIndex + 1) == len(spring.Parts) {
-//					validOrder += getPermutationNumberOfParts(Spring{Spring: cpSpring, Parts: spring.Parts}, currentPartIndex+1, j)
-//					break
-//				}
-//			}
-//		}
-//
-//	}
-//	return
-//}
 
 func assert(s Spring, expected int) {
 	var r = getPermutationNumberOfParts(s, 0, 0)
@@ -231,8 +137,31 @@ func partOne(springs []Spring) (out int) {
 	return
 }
 
+func partTwo(springs []Spring) (out int) {
+	var newSprings = make([]Spring, 0)
+	for _, spring := range springs {
+		var newSpring = Spring{}
+		for i := 0; i < 5; i++ {
+			newSpring.Spring = append(newSpring.Spring, spring.Spring...)
+			if i != 4 {
+				newSpring.Spring = append(newSpring.Spring, PART_UNKNOWN)
+			}
+			newSpring.Parts = append(newSpring.Parts, spring.Parts...)
+		}
+		newSprings = append(newSprings, newSpring)
+	}
+
+	for i, spring := range newSprings {
+		fmt.Println("Spring", i+1, 1000)
+		//fmt.Println("Spring", string(spring.Spring), getPermutationNumberOfParts(spring, 0, 0))
+		out += getPermutationNumberOfParts(spring, 0, 0)
+	}
+	return
+}
+
 func main() {
 	var rawData = utils.GetInput("day_12/input.txt")
 	var springs = parseData(rawData)
 	fmt.Println("Part one:", partOne(springs))
+	fmt.Println("Part Two:", partTwo(springs))
 }
